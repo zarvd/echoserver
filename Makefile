@@ -7,7 +7,7 @@ build:
 
 .PHONY: image
 image:
-	docker buildx build ../ \
+	docker buildx build ./ \
 		--output=type=docker \
 		--no-cache \
 		--force-rm \
