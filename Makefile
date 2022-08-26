@@ -3,7 +3,7 @@ IMAGE_TAG ?= v0.0.1
 
 .PHONY: build
 build:
-	go build -o bin/echoserver
+	CGO_ENABLED=0 go build -o bin/echoserver
 
 .PHONY: image
 image:
