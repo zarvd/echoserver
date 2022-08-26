@@ -1,0 +1,57 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echoserver-deployment
+  labels:
+    app: echoserver
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: echoserver
+  template:
+    metadata:
+      labels:
+        app: echoserver
+    spec:
+      containers:
+        - name: echoserver
+          image: echoserver:v0.0.4
+          command:
+            - /bin/echoserver
+            - -enable-tcp
+            - -tcp-ports=4000-4002
+            - -enable-udp
+            - -udp-ports=5000-5002
+            - -enable-http
+            - -http-ports=6000-6002
+          ports:
+            - name: tcp-4000
+              containerPort: 4000
+              protocol: TCP
+            - name: tcp-4001
+              containerPort: 4001
+              protocol: TCP
+            - name: tcp-4002
+              containerPort: 4002
+              protocol: TCP
+            - name: udp-5000
+              containerPort: 5000
+              protocol: UDP
+            - name: udp-5001
+              containerPort: 5001
+              protocol: UDP
+            - name: udp-5002
+              containerPort: 5002
+              protocol: UDP
+            - name: http-6000
+              containerPort: 6000
+              protocol: TCP
+            - name: http-6001
+              containerPort: 6001
+              protocol: TCP
+            - name: http-6002
+              containerPort: 6002
+              protocol: TCP
+
