@@ -29,11 +29,25 @@ func parsePortsString(s string) ([]int32, error) {
 	}
 	m := make(map[int32]struct{})
 	for _, portStr := range strings.Split(s, ",") {
-		port, err := strconv.ParseInt(portStr, 10, 32)
-		if err != nil {
-			return nil, fmt.Errorf("parse port: %w", err)
+		if start, end, isRange := strings.Cut(portStr, "-"); isRange {
+			startPort, err := strconv.ParseInt(start, 10, 32)
+			if err != nil {
+				return nil, fmt.Errorf("parse port: %w", err)
+			}
+			endPort, err := strconv.ParseInt(end, 10, 32)
+			if err != nil {
+				return nil, fmt.Errorf("parse port: %w", err)
+			}
+			for i := startPort; i <= endPort; i++ {
+				m[int32(i)] = struct{}{}
+			}
+		} else {
+			port, err := strconv.ParseInt(portStr, 10, 32)
+			if err != nil {
+				return nil, fmt.Errorf("parse port: %w", err)
+			}
+			m[int32(port)] = struct{}{}
 		}
-		m[int32(port)] = struct{}{}
 	}
 
 	var ports []int32
@@ -73,12 +87,16 @@ func Serve(
 
 func run(ctx context.Context) {
 	var (
-		enableUDP    bool
-		enableTCP    bool
+		enableUDP   bool
+		udpPortsStr string
+
+		enableTCP   bool
+		tcpPortsStr string
+
 		enableHTTP   bool
-		udpPortsStr  string
-		tcpPortsStr  string
 		httpPortsStr string
+
+		withK8SInfo bool
 	)
 
 	flag.BoolVar(&enableUDP, "enable-udp", false, "enable udp server")
@@ -87,6 +105,7 @@ func run(ctx context.Context) {
 	flag.StringVar(&udpPortsStr, "udp-ports", "", "udp ports")
 	flag.StringVar(&tcpPortsStr, "tcp-ports", "", "tcp ports")
 	flag.StringVar(&httpPortsStr, "http-ports", "", "http ports")
+	flag.BoolVar(&withK8SInfo, "with-k8s-info", false, "with k8s info")
 	flag.Parse()
 
 	ctx, cancel := context.WithCancel(ctx)
