@@ -17,9 +17,9 @@ spec:
     spec:
       containers:
         - name: echoserver
-          image: echoserver:v0.0.4
+          image: ghcr.io/lodrem/echoserver:v0.0.4
           command:
-            - /bin/echoserver
+            - /usr/local/bin/echoserver
             - -enable-tcp
             - -tcp-ports=4000-4002
             - -enable-udp
@@ -54,4 +54,3 @@ spec:
             - name: http-6002
               containerPort: 6002
               protocol: TCP
-
