@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"sync"
 	"testing"
@@ -27,7 +27,8 @@ func TestServeHTTP(t *testing.T) {
 
 		resp, err := http.Get(fmt.Sprintf("http://0.0.0.0:%d/ping", port))
 		assert.NoError(t, err)
-		data, err := ioutil.ReadAll(resp.Body)
+		data, err := io.ReadAll(resp.Body)
+		assert.NoError(t, err)
 		assert.Equal(t, "pong", string(data))
 
 		ps := []string{
@@ -42,7 +43,7 @@ func TestServeHTTP(t *testing.T) {
 				bytes.NewBufferString(ps[i]),
 			)
 			assert.NoError(t, err)
-			data, err := ioutil.ReadAll(resp.Body)
+			data, err := io.ReadAll(resp.Body)
 			assert.NoError(t, err)
 			assert.Equal(t, ps[i], string(data))
 		}

@@ -85,7 +85,7 @@ func Serve(
 	}
 }
 
-func run(ctx context.Context) {
+func main() {
 	var (
 		enableUDP   bool
 		udpPortsStr string
@@ -108,7 +108,7 @@ func run(ctx context.Context) {
 	flag.BoolVar(&withK8SInfo, "with-k8s-info", false, "with k8s info")
 	flag.Parse()
 
-	ctx, cancel := context.WithCancel(ctx)
+	ctx, cancel := context.WithCancel(context.Background())
 	wg := &sync.WaitGroup{}
 	Serve(ctx, wg, "UDP", enableUDP, udpPortsStr, ServeUDP)
 	Serve(ctx, wg, "TCP", enableTCP, tcpPortsStr, ServeTCP)
@@ -119,8 +119,4 @@ func run(ctx context.Context) {
 		cancel()
 		wg.Wait()
 	})
-}
-
-func main() {
-	run(context.Background())
 }
