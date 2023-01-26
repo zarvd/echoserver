@@ -1,13 +1,12 @@
-FROM golang:1.19-bullseye AS builder
+FROM rust:1.66-bullseye AS builder
 
 WORKDIR /workspace
-
 COPY . .
 
-RUN make build
+RUN cargo build --release
 
-FROM gcr.io/distroless/static
+FROM debian:bullseye-slim
 
-COPY --from=builder /workspace/bin/echoserver /usr/local/bin/echoserver
+COPY --from=builder /workspace/target/release/echoserver /usr/local/bin/echoserver
 
-ENTRYPOINT [ "/usr/local/bin/echoserver" ]
+ENTRYPOINT ["/usr/local/bin/echoserver"]

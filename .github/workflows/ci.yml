@@ -6,19 +6,22 @@ on:
 
 jobs:
   unit-test:
-    name: Unit test
+    name: Unit test using ${{matrix.rust}}
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        rust: [1.66, nightly, beta, stable]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Set up Go
-        uses: actions/setup-go@v3
+      - uses: actions-rs/toolchain@v1
         with:
-          go-version-file: ./go.mod
+          toolchain: ${{matrix.rust}}
       - name: Run unit tests
         run: |
-          make unit-test
+          just test
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -26,10 +29,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Set up Go
-        uses: actions/setup-go@v3
+      - uses: actions-rs/toolchain@v1
         with:
-          go-version-file: ./go.mod
+          toolchain: stable
+          components: clippy
+          override: true
       - name: Run lint
         run: |
-          make lint
+          just lint

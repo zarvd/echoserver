@@ -33,7 +33,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
       - name: Build Image
         run: |
-          make image IMAGE_REPO=${{ env.IMAGE_NAME }} IMAGE_TAG=${{ env.IMAGE_TAG }}
+          just image ${{ env.IMAGE_TAG }} image_repo=${{ env.IMAGE_NAME }}
       - name: Publish image
         run: |
           export DOCKER_IMAGE=${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
