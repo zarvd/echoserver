@@ -16,8 +16,8 @@ use tracing_subscriber::fmt::format::FmtSpan;
 #[derive(Default, Debug, Clone)]
 struct SocketAddrs(Vec<SocketAddr>);
 
-impl SocketAddrs {
-    fn to_string(&self) -> String {
+impl Display for SocketAddrs {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut ports = [false; u16::MAX as usize];
         for addr in &self.0 {
             ports[addr.port() as usize] = true;
@@ -31,10 +31,8 @@ impl SocketAddrs {
                     ranges.push((from_port, port - 1));
                     from = None;
                 }
-            } else {
-                if from.is_none() {
-                    from = Some(port);
-                }
+            } else if from.is_none() {
+                from = Some(port);
             }
         }
 
@@ -49,13 +47,7 @@ impl SocketAddrs {
             })
             .collect();
 
-        ranges.join(",")
-    }
-}
-
-impl Display for SocketAddrs {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.to_string())
+        write!(f, "{}", ranges.join(","))
     }
 }
 
