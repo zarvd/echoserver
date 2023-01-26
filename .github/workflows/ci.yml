@@ -22,7 +22,7 @@ jobs:
           toolchain: ${{matrix.rust}}
       - name: Run unit tests
         run: |
-          just test
+          cargo test --release
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -36,5 +36,7 @@ jobs:
           components: clippy
           override: true
       - name: Run lint
-        run: |
-          just lint
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features
