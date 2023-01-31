@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [1.66, nightly, beta, stable]
+        rust: [1.67, nightly, beta, stable]
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
