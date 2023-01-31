@@ -42,7 +42,7 @@ impl Display for SocketAddrs {
                 if from == end {
                     from.to_string()
                 } else {
-                    format!("{}-{}", from, end)
+                    format!("{from}-{end}")
                 }
             })
             .collect();
