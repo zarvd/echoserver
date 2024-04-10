@@ -18,19 +18,23 @@ async fn handle(socket: Arc<UdpSocket>, remote_addr: SocketAddr, data: &[u8]) ->
 pub async fn serve(addr: SocketAddr) -> Result<()> {
     info!("Serving UDP on {}", addr);
 
-    let socket = Arc::new(UdpSocket::bind(addr).await?);
+    let socket = Arc::new(
+        UdpSocket::bind(addr)
+            .await
+            .expect(&format!("bind TCP server on {addr}")),
+    );
 
     loop {
         let mut buf = [0; 2048];
         match socket.recv_from(&mut buf).await {
             Ok((n, remote_addr)) => {
-                handle(socket.clone(), remote_addr, &buf[0..n]).await?;
+                handle(socket.clone(), remote_addr, &buf[0..n])
+                    .await
+                    .expect(&format!("echo data from UDP server {addr}"));
             }
             Err(e) => {
                 error!("Failed to receive data: {}", e);
-                break;
             }
         }
     }
-    Ok(())
 }

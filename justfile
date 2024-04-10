@@ -1,4 +1,4 @@
-image_repo := "ghcr.io/lodrem/echoserver"
+image_repo := "ghcr.io/zarvd/echoserver"
 
 default:
     just --list

@@ -1,11 +1,11 @@
-FROM rust:1.67-bullseye AS builder
+FROM rust:1.77-buster AS builder
 
 WORKDIR /workspace
 COPY . .
 
 RUN cargo build --release
 
-FROM debian:bullseye-slim
+FROM debian:buster-slim
 
 COPY --from=builder /workspace/target/release/echoserver /usr/local/bin/echoserver
 

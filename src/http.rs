@@ -1,22 +1,57 @@
-use std::convert::Infallible;
 use std::net::SocketAddr;
+use std::time::Duration;
 
 use anyhow::Result;
-use hyper::service::{make_service_fn, service_fn};
-use hyper::{Body, Request, Response, Server};
-use tracing::{info, instrument};
+use axum::extract::Request;
+use axum::{
+    response::{IntoResponse, Response},
+    routing::{get, post},
+    Router,
+};
+use tokio::net::TcpListener;
+use tower_http::cors::CorsLayer;
+use tower_http::timeout::TimeoutLayer;
+use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
+use tracing::{info, Level};
 
-#[instrument]
-async fn handle(req: Request<Body>) -> Result<Response<Body>, Infallible> {
-    Ok(Response::new(req.into_body()))
+async fn ping(_req: Request) -> Response {
+    "pong".into_response()
+}
+
+async fn echo(req: Request) -> Response {
+    let (req_parts, body) = req.into_parts();
+
+    let (mut resp_parts, body) = Response::new(body).into_parts();
+    resp_parts.headers = req_parts.headers;
+
+    Response::from_parts(resp_parts, body)
 }
 
 pub async fn serve(addr: SocketAddr) -> Result<()> {
     info!("Serving HTTP on {}", addr);
 
-    let make_svc = make_service_fn(|_conn| async { Ok::<_, Infallible>(service_fn(handle)) });
+    let app = Router::new()
+        .route("/ping", get(ping))
+        .route("/echo", post(echo))
+        .layer(CorsLayer::permissive())
+        .layer(TimeoutLayer::new(Duration::from_secs(10)))
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(
+                    DefaultMakeSpan::new()
+                        .level(Level::INFO)
+                        .include_headers(true),
+                )
+                .on_request(DefaultOnRequest::new().level(Level::INFO))
+                .on_response(DefaultOnResponse::new().level(Level::INFO)),
+        );
 
-    Server::bind(&addr).serve(make_svc).await?;
+    let listener = TcpListener::bind(addr)
+        .await
+        .expect(&format!("bind HTTP server on {addr}"));
+    axum::serve(listener, app)
+        .await
+        .expect(&format!("serve HTTP server on {addr}"));
 
     Ok(())
 }
