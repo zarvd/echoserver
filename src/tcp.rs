@@ -1,7 +1,7 @@
 use std::net::SocketAddr;
 
 use anyhow::Result;
-use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 use tracing::{error, info, instrument};
 
@@ -12,22 +12,18 @@ use tracing::{error, info, instrument};
 async fn handle(mut socket: TcpStream) -> Result<()> {
     info!("Accepting new socket");
 
-    let (rh, mut wh) = socket.split();
-    let mut rh = BufReader::new(rh);
+    let mut buf = vec![0; 1024];
+
+    // In a loop, read data from the socket and write the data back.
     loop {
-        let mut buf = String::new();
-        match rh.read_line(&mut buf).await {
-            Ok(n) if n == 0 => break,
-            Ok(n) => {
-                info!("Read {} bytes, writing back", n);
-                wh.write_all(buf.as_bytes()).await?;
-            }
-            Err(e) => {
-                error!("Failed to read from socket: {}", e);
-                break;
-            }
+        let n = socket.read(&mut buf).await?;
+        if n == 0 {
+            break;
         }
+
+        socket.write_all(&buf[0..n]).await?;
     }
+
     info!("Dropping socket");
 
     Ok(())
@@ -36,7 +32,9 @@ async fn handle(mut socket: TcpStream) -> Result<()> {
 pub async fn serve(addr: SocketAddr) -> Result<()> {
     info!("Serving TCP on {}", addr);
 
-    let lis = TcpListener::bind(addr).await?;
+    let lis = TcpListener::bind(addr)
+        .await
+        .expect(&format!("bind TCP server on {addr}"));
 
     loop {
         match lis.accept().await {

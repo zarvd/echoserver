@@ -10,8 +10,7 @@ use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use anyhow::Result;
 use clap::Parser;
 use tokio::runtime;
-use tracing::{info, Level};
-use tracing_subscriber::fmt::format::FmtSpan;
+use tracing::{error, info, Level};
 
 #[derive(Default, Debug, Clone)]
 struct SocketAddrs(Vec<SocketAddr>);
@@ -87,13 +86,19 @@ fn parse_socket_addrs(arg: &str) -> Result<SocketAddrs> {
 }
 
 fn main() -> Result<()> {
-    tracing_subscriber::fmt()
-        .with_max_level(Level::INFO)
-        .with_span_events(FmtSpan::CLOSE)
-        .init();
+    tracing_subscriber::fmt().with_max_level(Level::INFO).init();
+
+    std::panic::set_hook(Box::new(move |info| {
+        error!("{info}");
+        std::process::exit(1);
+    }));
+
     let app: App = App::parse();
 
-    let rt = runtime::Builder::new_multi_thread().enable_io().build()?;
+    let rt = runtime::Builder::new_multi_thread()
+        .enable_io()
+        .enable_time()
+        .build()?;
     rt.block_on(async {
         let mut handles = vec![];
         for addr in app.tcp_addrs.0 {
