@@ -21,7 +21,7 @@ pub async fn serve(addr: SocketAddr) -> Result<()> {
     let socket = Arc::new(
         UdpSocket::bind(addr)
             .await
-            .expect(&format!("bind TCP server on {addr}")),
+            .unwrap_or_else(|e| panic!("failed to bind UDP server on {addr}: {e}")),
     );
 
     loop {
@@ -30,10 +30,10 @@ pub async fn serve(addr: SocketAddr) -> Result<()> {
             Ok((n, remote_addr)) => {
                 handle(socket.clone(), remote_addr, &buf[0..n])
                     .await
-                    .expect(&format!("echo data from UDP server {addr}"));
+                    .unwrap_or_else(|e| panic!("failed to echo data from UDP server {addr}: {e}"));
             }
             Err(e) => {
-                error!("Failed to receive data: {}", e);
+                error!("[UDP/{addr}] Failed to receive data: {e}");
             }
         }
     }

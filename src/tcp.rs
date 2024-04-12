@@ -34,7 +34,7 @@ pub async fn serve(addr: SocketAddr) -> Result<()> {
 
     let lis = TcpListener::bind(addr)
         .await
-        .expect(&format!("bind TCP server on {addr}"));
+        .unwrap_or_else(|e| panic!("failed to bind TCP server on {addr}: {e}"));
 
     loop {
         match lis.accept().await {
@@ -42,7 +42,7 @@ pub async fn serve(addr: SocketAddr) -> Result<()> {
                 tokio::spawn(handle(socket));
             }
             Err(e) => {
-                error!("[TCP/{}] Failed to accept new socket: {}", addr, e);
+                error!("[TCP/{addr}] Failed to accept new socket: {e}");
             }
         }
     }

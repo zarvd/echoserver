@@ -7,7 +7,7 @@ pub async fn shutdown() {
         () = recv_signal_and_shutdown(SignalKind::terminate()) => {}
     };
 
-    info!("recv signal and shutting down");
+    info!("received signal and shutting down");
 }
 
 async fn recv_signal_and_shutdown(kind: SignalKind) {
