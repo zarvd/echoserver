@@ -4,25 +4,30 @@ on:
   workflow_dispatch:
   pull_request:
   push:
+    branches:
+      - master
 
 jobs:
   unit-test:
-    name: Unit test using ${{matrix.rust}}
+    name: Unit test
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        rust: [ 1.77, nightly, beta, stable ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: ${{matrix.rust}}
+          toolchain: stable
+          components: clippy
+      - uses: extractions/setup-just@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install cargo-nextest
+        uses: taiki-e/install-action@nextest
       - name: Run unit tests
         run: |
-          cargo test --release
+          just unit-test
+
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -30,9 +35,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: stable
           components: clippy
+      - uses: extractions/setup-just@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run lint
-        run: cargo clippy --all-targets --all-features
+        run: just lint

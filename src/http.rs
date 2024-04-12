@@ -48,10 +48,10 @@ pub async fn serve(addr: SocketAddr) -> Result<()> {
 
     let listener = TcpListener::bind(addr)
         .await
-        .expect(&format!("bind HTTP server on {addr}"));
+        .unwrap_or_else(|e| panic!("failed to bind HTTP server on {addr}: {e}"));
     axum::serve(listener, app)
         .await
-        .expect(&format!("serve HTTP server on {addr}"));
+        .unwrap_or_else(|e| panic!("failed to serve HTTP server on {addr}: {e}"));
 
     Ok(())
 }

@@ -1,26 +1,29 @@
-image_repo := "ghcr.io/zarvd/echoserver"
-
 default:
     just --list
 
+# Build the project
 build:
-    cargo build --release
+    cargo build
 
-run:
-    cargo run --release
-
+# Format code with rust
 fmt:
     cargo fmt
 
-test:
-    cargo test --release
+# Run unit tests against the current platform
+unit-test:
+    cargo nextest run
 
+# Lint code with clippy
 lint:
-    cargo clippy --release
+    cargo fmt --all -- --check
+    cargo clippy --all-targets --all-features
 
+# Clean workspace
 clean:
     cargo clean
 
+image_repo := "ghcr.io/zarvd/echoserver"
+# Build docker image
 image tag: clean
     docker buildx build ./ \
         --output=type=docker \
