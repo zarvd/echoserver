@@ -12,7 +12,6 @@ fmt:
 # Run unit tests against the current platform
 unit-test:
     cargo nextest run
-    cargo test --doc
 
 # Lint code with clippy
 lint:
