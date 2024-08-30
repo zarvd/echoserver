@@ -3,11 +3,9 @@ use std::time::Duration;
 
 use anyhow::Result;
 use axum::extract::Request;
-use axum::{
-    response::{IntoResponse, Response},
-    routing::{get, post},
-    Router,
-};
+use axum::response::{IntoResponse, Response};
+use axum::routing::{get, post};
+use axum::Router;
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 use tower_http::timeout::TimeoutLayer;
