@@ -1,11 +1,11 @@
-FROM rust:1.77-buster AS builder
+FROM rust:1.80-bookworm AS builder
 
 WORKDIR /workspace
 COPY . .
 
 RUN cargo build --release
 
-FROM debian:buster-slim
+FROM debian:bookworm-slim
 
 COPY --from=builder /workspace/target/release/echoserver /usr/local/bin/echoserver
 

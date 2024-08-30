@@ -16,5 +16,5 @@ anyhow = "1.0.82"
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18" }
 tower-http = { version = "0.5.2", features = ["add-extension", "trace", "cors", "timeout"] }
-tokio = { version = "1.37.0", features = ["rt-multi-thread", "signal", "macros", "net", "io-util"] }
+tokio = { version = "1.40.0", features = ["rt-multi-thread", "signal", "macros", "net", "io-util"] }
 axum = { version = "0.7.5" }

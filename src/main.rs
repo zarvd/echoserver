@@ -1,3 +1,29 @@
+#![deny(
+    warnings,
+    rust_2018_idioms,
+    clippy::branches_sharing_code,
+    clippy::clear_with_drain,
+    clippy::clone_on_ref_ptr,
+    clippy::cognitive_complexity,
+    clippy::collection_is_never_read,
+    clippy::dbg_macro,
+    clippy::debug_assert_with_mut_call,
+    clippy::enum_glob_use,
+    clippy::equatable_if_let,
+    clippy::get_unwrap,
+    clippy::inefficient_to_string,
+    clippy::macro_use_imports,
+    clippy::map_clone,
+    clippy::map_unwrap_or,
+    clippy::needless_collect,
+    clippy::option_if_let_else,
+    clippy::or_fun_call,
+    clippy::str_to_string,
+    clippy::too_many_lines,
+    clippy::uninlined_format_args,
+    clippy::wildcard_imports
+)]
+
 mod http;
 mod signal;
 mod tcp;

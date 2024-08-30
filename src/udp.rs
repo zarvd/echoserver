@@ -28,7 +28,7 @@ pub async fn serve(addr: SocketAddr) -> Result<()> {
         let mut buf = [0; 2048];
         match socket.recv_from(&mut buf).await {
             Ok((n, remote_addr)) => {
-                handle(socket.clone(), remote_addr, &buf[0..n])
+                handle(Arc::clone(&socket), remote_addr, &buf[0..n])
                     .await
                     .unwrap_or_else(|e| panic!("failed to echo data from UDP server {addr}: {e}"));
             }
