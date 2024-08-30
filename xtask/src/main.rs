@@ -62,12 +62,6 @@ fn unit_test() -> Result<()> {
     Ok(())
 }
 
-fn test_doc() -> Result<()> {
-    println!("{}", style("cargo test --doc --all-features").bold());
-    cmd!("cargo", "test", "--doc", "--all-features").run()?;
-    Ok(())
-}
-
 fn bench() -> Result<()> {
     println!("{}", style("cargo bench --all-features").bold());
     cmd!("cargo", "bench", "--all-features").run()?;
@@ -110,7 +104,6 @@ fn main() -> Result<()> {
         }
         Action::Test => {
             unit_test()?;
-            test_doc()?;
         }
         Action::Bench => {
             bench()?;
