@@ -7,6 +7,7 @@ use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::Router;
 use tokio::net::TcpListener;
+use tokio::time::timeout;
 use tower_http::cors::CorsLayer;
 use tower_http::timeout::TimeoutLayer;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
@@ -44,10 +45,14 @@ pub async fn serve(addr: SocketAddr) -> Result<()> {
                 .on_response(DefaultOnResponse::new().level(Level::INFO)),
         );
 
-    let listener = TcpListener::bind(addr)
+    let lis = timeout(Duration::from_secs(5), TcpListener::bind(addr))
         .await
+        .unwrap_or_else(|e| panic!("timout to bind HTTP server on {addr}: {e}"))
         .unwrap_or_else(|e| panic!("failed to bind HTTP server on {addr}: {e}"));
-    axum::serve(listener, app)
+
+    info!("HTTP server up on {addr}");
+
+    axum::serve(lis, app)
         .await
         .unwrap_or_else(|e| panic!("failed to serve HTTP server on {addr}: {e}"));
 
