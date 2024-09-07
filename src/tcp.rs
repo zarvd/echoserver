@@ -1,8 +1,10 @@
 use std::net::SocketAddr;
+use std::time::{Duration, Instant};
 
 use anyhow::Result;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
+use tokio::time::timeout;
 use tracing::{error, info, instrument};
 
 #[instrument(skip_all, fields(
@@ -11,6 +13,7 @@ use tracing::{error, info, instrument};
 ))]
 async fn handle(mut socket: TcpStream) -> Result<()> {
     info!("Accepting new socket");
+    let t1 = Instant::now();
 
     let mut buf = vec![0; 1024];
 
@@ -24,17 +27,21 @@ async fn handle(mut socket: TcpStream) -> Result<()> {
         socket.write_all(&buf[0..n]).await?;
     }
 
-    info!("Dropping socket");
+    let elapsed = t1.elapsed();
+    info!("Dropping socket after {} ms", elapsed.as_millis());
 
     Ok(())
 }
 
 pub async fn serve(addr: SocketAddr) -> Result<()> {
-    info!("Serving TCP on {}", addr);
+    info!("Serving TCP on {addr}");
 
-    let lis = TcpListener::bind(addr)
+    let lis = timeout(Duration::from_secs(5), TcpListener::bind(addr))
         .await
+        .unwrap_or_else(|e| panic!("timeout to bind TCP server on {addr}: {e}"))
         .unwrap_or_else(|e| panic!("failed to bind TCP server on {addr}: {e}"));
+
+    info!("TCP server up on {addr}");
 
     loop {
         match lis.accept().await {

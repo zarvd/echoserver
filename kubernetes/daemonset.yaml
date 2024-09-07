@@ -1,12 +1,11 @@
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
   name: echoserver
   labels:
     app: echoserver
 spec:
-  replicas: 3
   selector:
     matchLabels:
       app: echoserver
@@ -29,28 +28,37 @@ spec:
           ports:
             - name: tcp-4000
               containerPort: 4000
+              hostPort: 4000
               protocol: TCP
             - name: tcp-4001
               containerPort: 4001
+              hostPort: 4001
               protocol: TCP
             - name: tcp-4002
               containerPort: 4002
+              hostPort: 4002
               protocol: TCP
             - name: udp-5000
               containerPort: 5000
+              hostPort: 5000
               protocol: UDP
             - name: udp-5001
               containerPort: 5001
+              hostPort: 5001
               protocol: UDP
             - name: udp-5002
               containerPort: 5002
+              hostPort: 5002
               protocol: UDP
             - name: http-6000
               containerPort: 6000
+              hostPort: 6000
               protocol: TCP
             - name: http-6001
               containerPort: 6001
+              hostPort: 6001
               protocol: TCP
             - name: http-6002
               containerPort: 6002
+              hostPort: 6002
               protocol: TCP
