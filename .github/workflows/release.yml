@@ -7,7 +7,7 @@ on:
       - "v*.*.*"
 
 env:
-  IMAGE_NAME: ${{ github.repository }}
+  REGISTRY_IMAGE: ghcr.io/${{ github.repository }}
 
 jobs:
   build-image:
@@ -19,7 +19,6 @@ jobs:
       matrix:
         platform:
           - linux/amd64
-          - linux/arm/v6
           - linux/arm/v7
           - linux/arm64
     steps:
@@ -48,7 +47,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY_IMAGE }}
 
       - name: Build and push by digest
         id: build
@@ -104,8 +103,14 @@ jobs:
       - name: Create manifest list and push
         working-directory: /tmp/digests
         run: |
-          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "${{ steps.meta.outputs.json }}") \
-            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+          if [[ -n "${{ steps.meta.outputs.tags }}" ]]; then
+            tags=$(echo "${{ steps.meta.outputs.tags }}" | tr '\n' ' ' | xargs -I {} echo "-t {}")
+            docker buildx imagetools create $tags \
+              $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+          else
+            echo "No tags found. Skipping manifest creation."
+            exit 1
+          fi
 
       - name: Inspect image
         run: |
