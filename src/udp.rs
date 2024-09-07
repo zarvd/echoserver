@@ -23,8 +23,10 @@ pub async fn serve(addr: SocketAddr) -> Result<()> {
     let socket = timeout(Duration::from_secs(5), UdpSocket::bind(addr))
         .await
         .unwrap_or_else(|e| panic!("timeout to bind UDP server on {addr}: {e}"))
-        .map(Arc::new)
-        .unwrap_or_else(|e| panic!("failed to bind UDP server on {addr}: {e}"));
+        .map_or_else(
+            |e| panic!("failed to bind UDP server on {addr}: {e}"),
+            Arc::new,
+        );
 
     info!("UDP server up on {addr}");
 
